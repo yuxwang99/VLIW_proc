@@ -136,3 +136,41 @@ void VLIW_proc::scheduleCode(){
         i++;
       }
     }
+
+void VLIW_proc::rescheduleCode(int validII){
+  int gap = validII - II;
+  while(gap--){
+    scheduleTable.push_back(emptyHW);
+  }
+  gap = validII - II;
+  for(int t=scheduleTable.size()-1;t>=VLIW_BB1+gap;t--){
+    scheduleTable[t] = scheduleTable[t-gap];
+    scheduleTable[t-gap] = emptyHW;
+  }
+  scheduleTable[VLIW_BB1-1+gap][4] = scheduleTable[VLIW_BB1-1][4];
+  scheduleTable[VLIW_BB1-1][4] = -1;
+  VLIW_BB1 = VLIW_BB1 + gap;
+
+  cout<< "NEW SCHEDULING..." << '\n';
+  cout<< " " << left << "|ALU0" << setw(11) << right 
+      <<  "|ALU1" << setw(11)
+      <<  "|Mult" << setw(10)
+      <<  "|Mem" << setw(14)
+      <<  "|Branch" << setw(5)  << "|" << '\n';
+  int i = 0;
+  for (auto time : scheduleTable){
+    cout<< left << i <<"|" << setw(10)<<right ;
+    for(int used: time){
+      if(used>=0) {
+        cout << left<< setw(10)<< used << "|" << right ;
+      }
+      else{
+        cout << left<< setw(10)<< " " << "|" << right;
+      }
+      
+    }
+    cout << std::endl;
+    i++;
+  }
+
+}

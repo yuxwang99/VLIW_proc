@@ -4,9 +4,14 @@
 #include <iostream>
 #include <map> 
 #include <ctype.h>
-
+using namespace std;
+ 
 VLIW_proc::VLIW_proc(string jsonPath1){
       jsonPath = jsonPath1;
+      int reg = 32;
+      while(reg--){
+        freeReg.push_back(reg);
+      }
       mapOP2HW["add"] = "ALU";
       mapOP2HW["addi"] = "ALU";
       mapOP2HW["sub"] = "ALU";
@@ -23,10 +28,16 @@ void VLIW_proc::scheduleVLIW(){
       splitBB();
       dependencyAnalysize();
       scheduleCode();
-      int validII = computeII();
-      if(II != validII){
-        rescheduleCode();
+      int validII = computeII(II);
+      cout << "success!" << endl;
+      if(II == validII){
+        cout << "II is valid, no need for rescheduling" << endl;
       }
+      else{
+        rescheduleCode(validII);
+        II = validII;
+      }
+      vector<string> movOP = allocR();
     }
 
 vector<string> VLIW_proc::decodeIns(string instruction){
@@ -82,9 +93,9 @@ void VLIW_proc::analysizeCode(){
         ins_id =i;
         Id.push_back(ins_id);
       }
-      std::cout << "----------------" << std::endl;
+      cout << "----------------" << std::endl;
       cout<<"COMPILING CODE..."<<'\n';
-      std::cout << "ins_id" << setw(10) 
+      cout << "ins_id" << setw(10) 
       << "operation" << setw(10)
       << "reg_dst" << setw(15)
       << "operator_0" << setw(15) 
@@ -115,41 +126,48 @@ void VLIW_proc::splitBB(){
       cout<<" "<<BB1<<" to "<<insArray.size()<<'\n';
     }
 
-int VLIW_proc::computeII(){
+int VLIW_proc::computeII(int initII){
       int exam_ins_pos, dep_ins_pos;
+      bool incrementII = false;
+      cout << "----------------" << std::endl;
+      cout << "Test and check initial interval(II): " << initII  << std::endl;
       for (auto interdep : depInter){
         int exam_ins = interdep.first;
         exam_ins_pos = timeSchedule[exam_ins];
-        int latency = (action[exam_ins]=="mulu")? 3:1;
+        
         for (auto dep_ins: interdep.second){
+          int latency = (action[dep_ins]=="mulu")? 3:1;
           dep_ins_pos = timeSchedule[dep_ins];
           // If dependent instruction is namly after current examing instruction, 
           // it is the last loop results that brought dependency
           if(dep_ins_pos>=exam_ins_pos){
-            if(exam_ins_pos+latency>dep_ins_pos+II){
-              II++;
-              computeII();
+            if(dep_ins_pos+latency>exam_ins_pos+initII){
+              initII++;
+              cout << "Invalid" << std::endl;
+              initII = computeII(initII);
+              incrementII = true;
               break;
             }
           }
           // If interloop dependency is caused by instruction in BB0, check the latency directly
           else{
             if(dep_ins_pos+latency>exam_ins_pos){
-              cout<<"changing II"<< "\n";
-              II++;
-              computeII();
+              initII++;
+              cout << "Invalid" << std::endl;
+              initII = computeII(initII);
+              incrementII = true;
               break;
             }
           }
+          
         }
+        if(incrementII) break;
       }
 
-      std::cout << "----------------" << std::endl;
-      cout << "Test and check initial interval(II)..." << std::endl;
-      cout << "Initial Inverval is " << II << std::endl; 
-      return II;
+      
+      return initII;
     }
 
-void VLIW_proc::rescheduleCode(){
-
+void reArrangeR(vector<string>){
+  
 }

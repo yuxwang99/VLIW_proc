@@ -40,7 +40,12 @@ void VLIW_proc::dependencyAnalysize(){
            string producer;
            vector<int> depreg;
           for(int j=branchStart;j<i;j++){
-            producer =findRegister(dst[j]);
+            if (action[j]!="st"){
+              producer =findRegister(dst[j]);
+            }
+            else{
+              producer =findRegister(operator0[j]);
+            }
             // register that cause dependency cannot be empty
             if(producer!=""){
               if(producer==reg_op0 | producer==reg_op1 | producer==reg_dst){

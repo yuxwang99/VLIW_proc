@@ -32,7 +32,9 @@ class VLIW_proc
     vector<vector<int> > scheduleTable;
     // table used to record when the scheduled instruction will be executed
     // for avoiding dependency 
+    vector<vector<string> >results;
     map<int, int> timeSchedule; 
+    vector<int> freeReg;
     vector<int> emptyHW = vector<int> (5,-1);
 
 public:
@@ -47,9 +49,10 @@ public:
     void splitBB();//
     void scheduleCode();
     void dependencyAnalysize();
-    int computeII();
-    void rescheduleCode();
-    
+    int computeII(int initII);
+    void rescheduleCode(int validII);
+    vector<string> allocR();
+    void reArrangeR(vector<string>);
 
 };
 
