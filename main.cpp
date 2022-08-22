@@ -6,5 +6,6 @@ int main(){
   VLIW_proc proc(path_);
   proc.readFromStream();
   proc.scheduleVLIW();
+  proc.printResult();
   return 0;
 }

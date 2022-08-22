@@ -7,6 +7,12 @@
 // #include <ctype.h>
 
 using namespace std;
+
+struct insertIns{
+    int loc;
+    string ins;
+};
+
 class VLIW_proc
 {
   private:
@@ -51,8 +57,9 @@ public:
     void dependencyAnalysize();
     int computeII(int initII);
     void rescheduleCode(int validII);
-    vector<string> allocR();
-    void reArrangeR(vector<string>);
+    vector<insertIns> allocR();
+    void reArrangeR(vector<insertIns>);
+    void printResult();
 
 };
 

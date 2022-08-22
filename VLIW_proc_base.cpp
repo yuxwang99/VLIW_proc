@@ -37,7 +37,8 @@ void VLIW_proc::scheduleVLIW(){
         rescheduleCode(validII);
         II = validII;
       }
-      vector<string> movOP = allocR();
+      vector<insertIns> movOP = allocR();
+      reArrangeR(movOP);
     }
 
 vector<string> VLIW_proc::decodeIns(string instruction){
@@ -168,6 +169,42 @@ int VLIW_proc::computeII(int initII){
       return initII;
     }
 
-void reArrangeR(vector<string>){
+void VLIW_proc::reArrangeR(vector<insertIns> newIns){
   
+  int numIns = newIns.size()-1;
+  // Check whether there is enough ALU units 
+  // for register renaming
+  int arrangeLoc = VLIW_BB1-1;
+  int validII = II;
+  while(numIns>=0){
+    struct insertIns scheduleins=newIns[numIns];
+    if(arrangeLoc>scheduleins.loc){
+      if(results[arrangeLoc][0]=="nop"){
+        results[arrangeLoc][0] = scheduleins.ins;
+      }
+      else if(results[arrangeLoc][1]=="nop"){
+        results[arrangeLoc][1] = scheduleins.ins;
+        arrangeLoc--;
+      }
+      else{
+        validII++;
+      }
+      numIns--;
+    }
+  }
+  if(validII!=II){
+    rescheduleCode(validII);
+    reArrangeR(newIns);
+  }
+  // for(int )
+
+}
+void VLIW_proc::printResult(){
+  cout << left << "  " << setw(15) <<right<<endl;
+  for(int i=0;i<results.size();i++){
+    for(int j=0; j<5; j++){
+       cout << left << results[i][j]<< setw(15) <<right;
+    }
+    cout << std::endl;
+  }
 }

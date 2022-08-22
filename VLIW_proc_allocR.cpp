@@ -7,13 +7,19 @@
 #include <ctype.h>
 using namespace std;
 
-vector<string> VLIW_proc::allocR(){
+// struct insertIns{
+//     int loc;
+//     string ins;
+// };
+
+
+vector<insertIns> VLIW_proc::allocR(){
     // vector
     results = vector<vector<string> >(scheduleTable.size(), vector<string>(5, "nop"));
-    cout << left << "  " << setw(15) <<right<<endl;
+    
     map<string, string> renameTable;
-    vector<string> newMovOP;
-    for(int i=0;i<scheduleTable.size();i++){
+    vector<insertIns> newMovOP;
+    for(int i=0;i<VLIW_BB1;i++){
         
         for(int j=0;j<5;j++){
             int ins = scheduleTable[i][j];
@@ -39,7 +45,8 @@ vector<string> VLIW_proc::allocR(){
                     renameTable[dst[ins]] = "x" + to_string(freeReg.back());
                     if(dstreg==op0||dstreg==op1){
                         string movOP = "mov " + oldReg + " " + renameTable[dst[ins]]+ " " ;
-                        newMovOP.push_back(movOP);
+                        struct insertIns newit = {i, movOP};
+                        newMovOP.push_back(newit);
                     }
                     dst[ins] = "x" + to_string(freeReg.back());
                 }
@@ -49,9 +56,9 @@ vector<string> VLIW_proc::allocR(){
                 results[i][j] = final_ins;
             }
             op0 = op1 = "";
-            cout << left << results[i][j]<< setw(15) <<right;
+           
         }
-        cout << std::endl;
+        // cout << std::endl;
     }
 
     return newMovOP;
